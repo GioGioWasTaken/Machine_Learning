@@ -1,7 +1,7 @@
 import numpy as np
 from sklearn.linear_model import SGDRegressor
 from sklearn.preprocessing import StandardScaler
-
+import matplotlib.pyplot as plt
 x_train = np.array(
     [[1.24e+03, 3.00e+00, 1.00e+00, 6.40e+01],
      [1.95e+03, 3.00e+00, 2.00e+00, 1.70e+01],
@@ -131,4 +131,6 @@ print(f"model parameters:\nw: {w_norm}, \nb: {b_norm}")
 # make a prediction using sgdr.predict()
 y_pred_sgd = sgdr.predict(x_norm)
 print(f"Prediction on training set:\n{y_pred_sgd[:4]}" )
-print(f"Target values \n{y_train[:4]}")
+print(f"Target values: \n{y_train[:4]}")
+plt.plot(x_norm[:,0],y_pred_sgd,"-o")
+plt.show()
