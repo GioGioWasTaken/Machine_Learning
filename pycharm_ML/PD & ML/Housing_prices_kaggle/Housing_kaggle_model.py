@@ -6,6 +6,10 @@ import copy, math
 data = pd.read_csv('train_updated.csv')
 print(data[['Id', 'LotFrontage', 'LotArea', 'lot_depth', 'house_age', 'SalePrice']].head(5))
 
+# lot depth and house age are features that did not exist before.
+# They were made using available data and feature engineering.
+
+
 # Fix NaN values in LotFrontage and lot_depth columns
 lot_frontage = np.nan_to_num(np.array(data['LotFrontage']), nan=0.1)
 lot_depth = np.nan_to_num(np.array(data['lot_depth']), nan=0.1)
