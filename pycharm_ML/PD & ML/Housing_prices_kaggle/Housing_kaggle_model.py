@@ -19,9 +19,27 @@ lot_area = np.array(data['LotArea'])
 lot_area = (lot_area - np.mean(lot_area)) / np.std(lot_area)
 house_age = np.array(data['house_age'])
 house_age = (house_age - np.mean(house_age)) / np.std(house_age)
+overall_quality=np.array(data['OverallQual'])
+overall_quality=(overall_quality-np.mean(overall_quality)) / np.std(overall_quality)
+overall_condition= np.array(data['OverallCond'])
+overall_condition=(overall_condition-np.mean(overall_condition)) / np.std(overall_condition)
+GarageArea=np.array(data['GarageArea'])
+GarageArea=(GarageArea-np.mean(GarageArea)) / np.std(GarageArea)
+GarageCars=np.array(data['GarageCars'])
+GarageCars=(GarageCars-np.mean(GarageCars)) / np.std(GarageCars)
+WoodDeckSF=np.array(data['WoodDeckSF'])
+WoodDeckSF=(WoodDeckSF-np.mean(WoodDeckSF)) / np.std(WoodDeckSF)
+TotRmsAbvGrd=np.array(data['TotRmsAbvGrd'])
+TotRmsAbvGrd=(TotRmsAbvGrd-np.mean(TotRmsAbvGrd)) / np.std(TotRmsAbvGrd)
+BedroomAbvGr=np.array(data['BedroomAbvGr'])
+BedroomAbvGr=(BedroomAbvGr-np.mean(BedroomAbvGr)) / np.std(BedroomAbvGr)
+GrLivArea=np.array(data['GrLivArea'])
+GrLivArea=(GrLivArea-np.mean(GrLivArea)) / np.std(GrLivArea)
+
+# POSSIBLE FEATURES:  GarageQual, GarageArea, GarageCars WoodDeckSF, TotRmsAbvGrd, BedroomAbvGr, GrLivArea
 
 # Combine feature values into an input matrix
-X_train = np.column_stack((lot_frontage, lot_area, lot_depth, house_age))
+X_train = np.column_stack((lot_frontage, lot_area, lot_depth, house_age,overall_quality,overall_condition,GarageArea, GarageCars, WoodDeckSF, TotRmsAbvGrd, BedroomAbvGr, GrLivArea))
 
 # Standardize the output values
 Y_train = np.array(data['SalePrice'])
@@ -88,7 +106,16 @@ obsv=0
 
 # Make a prediction for the first training example
 prediction = predict(X_train[obsv], final_w, final_b)
-print(f"Prediction for first training example: {prediction}\nTraining values: {Y_train[obsv]}")
+print(f"Prediction for #{obsv} training example: {prediction}\nTraining values: {Y_train[obsv]}")
+
+def predict_all(x,y,w,b):
+    all_pred=[]
+    for i in range(X_train.shape[0]):
+        all_pred.append(np.dot(x[i],w)+b)
+    return all_pred
+all_pred=predict_all(X_train,Y_train,final_w,final_b)
+print(f"Training data: {list(Y_train)}\nPredictions: {all_pred}")
+
 # plot cost versus iteration
 fig, (ax1, ax2) = plt.subplots(1, 2, constrained_layout=True, figsize=(12, 4))
 ax1.plot(J_hist)
@@ -97,12 +124,18 @@ ax1.set_title("Cost vs. iteration");  ax2.set_title("Cost vs. iteration (tail)")
 ax1.set_ylabel('Cost')             ;  ax2.set_ylabel('Cost')
 ax1.set_xlabel('iteration step')   ;  ax2.set_xlabel('iteration step')
 plt.show()
+# Deduction from current results: the more features, the better this model works.
+# Perfect for practice.
 
 
-# Iteration 10000: Cost     0.36  , learning rate alpha cannot be made larger without overshooting.
+#Iteration 10000: Cost     0.21
 # Final w and b found by gradient descent:
-# W: [ 1.82515340e-03  1.30595594e-01  2.27946268e-04 -2.87948989e-01]
-# B: -0.06383796734380544
-# Prediction for first training example: 0.3600108233179311
+# W: [ 1.11862456e-03  1.24833782e-01  2.69276287e-04 -2.04355404e-01
+#   3.74552936e-01  1.99124144e-03]
+# B: -0.05175613924547292
+# Prediction for #0 training example: 0.48786194512065045
 # Training values: 0.34727321973650555
-# result unsatisfactory, will re-attempt after learning what overfitting is.
+# Training data: [ 0.34727322  0.00728832  0.53615372 ...  1.07761115 -0.48852299
+#  -0.42084081]
+# Predictions: [ 0.48786195  0.06803958  0.52225555 ...  0.08579114 -0.38823288
+#  -0.2789255 ]
