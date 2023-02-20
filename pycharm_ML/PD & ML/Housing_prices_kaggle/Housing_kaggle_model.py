@@ -15,28 +15,61 @@ lot_frontage = np.nan_to_num(np.array(data['LotFrontage']), nan=0.1)
 lot_depth = np.nan_to_num(np.array(data['lot_depth']), nan=0.1)
 
 # Extract other feature values and standardize them
-lot_area = np.array(data['LotArea'])
-lot_area = (lot_area - np.mean(lot_area)) / np.std(lot_area)
-house_age = np.array(data['house_age'])
-house_age = (house_age - np.mean(house_age)) / np.std(house_age)
-overall_quality=np.array(data['OverallQual'])
-overall_quality=(overall_quality-np.mean(overall_quality)) / np.std(overall_quality)
-overall_condition= np.array(data['OverallCond'])
-overall_condition=(overall_condition-np.mean(overall_condition)) / np.std(overall_condition)
-GarageArea=np.array(data['GarageArea'])
-GarageArea=(GarageArea-np.mean(GarageArea)) / np.std(GarageArea)
-GarageCars=np.array(data['GarageCars'])
-GarageCars=(GarageCars-np.mean(GarageCars)) / np.std(GarageCars)
-WoodDeckSF=np.array(data['WoodDeckSF'])
-WoodDeckSF=(WoodDeckSF-np.mean(WoodDeckSF)) / np.std(WoodDeckSF)
-TotRmsAbvGrd=np.array(data['TotRmsAbvGrd'])
-TotRmsAbvGrd=(TotRmsAbvGrd-np.mean(TotRmsAbvGrd)) / np.std(TotRmsAbvGrd)
-BedroomAbvGr=np.array(data['BedroomAbvGr'])
-BedroomAbvGr=(BedroomAbvGr-np.mean(BedroomAbvGr)) / np.std(BedroomAbvGr)
-GrLivArea=np.array(data['GrLivArea'])
-GrLivArea=(GrLivArea-np.mean(GrLivArea)) / np.std(GrLivArea)
+class StandardScaler:
+    def __init__(self):
+        self.mean = None
+        self.std = None
 
-# POSSIBLE FEATURES:  GarageQual, GarageArea, GarageCars WoodDeckSF, TotRmsAbvGrd, BedroomAbvGr, GrLivArea
+    def fit(self, data):
+        self.mean = np.mean( data )
+        self.std = np.std( data )
+
+    def transform(self, data):
+        return (data - self.mean) / self.std
+
+
+scaler = StandardScaler()
+
+lot_area = np.array( data['LotArea'] )
+house_age = np.array( data['house_age'] )
+overall_quality = np.array( data['OverallQual'] )
+overall_condition = np.array( data['OverallCond'] )
+GarageArea = np.array( data['GarageArea'] )
+GarageCars = np.array( data['GarageCars'] )
+WoodDeckSF = np.array( data['WoodDeckSF'] )
+TotRmsAbvGrd = np.array( data['TotRmsAbvGrd'] )
+BedroomAbvGr = np.array( data['BedroomAbvGr'] )
+GrLivArea = np.array( data['GrLivArea'] )
+
+scaler.fit( lot_area )
+lot_area = scaler.transform( lot_area )
+
+scaler.fit( house_age )
+house_age = scaler.transform( house_age )
+
+scaler.fit( overall_quality )
+overall_quality = scaler.transform( overall_quality )
+
+scaler.fit( overall_condition )
+overall_condition = scaler.transform( overall_condition )
+
+scaler.fit( GarageArea )
+GarageArea = scaler.transform( GarageArea )
+
+scaler.fit( GarageCars )
+GarageCars = scaler.transform( GarageCars )
+
+scaler.fit( WoodDeckSF )
+WoodDeckSF = scaler.transform( WoodDeckSF )
+
+scaler.fit( TotRmsAbvGrd )
+TotRmsAbvGrd = scaler.transform( TotRmsAbvGrd )
+
+scaler.fit( BedroomAbvGr )
+BedroomAbvGr = scaler.transform( BedroomAbvGr )
+
+scaler.fit( GrLivArea )
+GrLivArea = scaler.transform( GrLivArea )
 
 # Combine feature values into an input matrix
 X_train = np.column_stack((lot_frontage, lot_area, lot_depth, house_age,overall_quality,overall_condition,GarageArea, GarageCars, WoodDeckSF, TotRmsAbvGrd, BedroomAbvGr, GrLivArea))
