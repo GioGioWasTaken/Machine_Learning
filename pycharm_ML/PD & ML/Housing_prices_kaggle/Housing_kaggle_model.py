@@ -79,12 +79,10 @@ Y_train = np.array(data['SalePrice'])
 Y_train = (Y_train - np.mean(Y_train)) / np.std(Y_train)
 
 
-def compute_cost(x, y, w, b):
+def compute_cost(x, y, theata, b):
     m = x.shape[0]
-    cost = 0.0
-    for i in range( m ):
-        f_wb_i = np.dot( x[i], w ) + b
-        cost = cost + (f_wb_i - y[i]) ** 2
+    prediction = np.dot( x, theata ) + b
+    cost = np.sum((prediction-y)**2) / (2*m)
     cost = cost / (2 * m)
     return cost
 

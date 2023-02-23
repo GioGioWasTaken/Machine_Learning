@@ -23,6 +23,9 @@ c_failures=np.array(math_data['failures']) #class failures
 schools_help=np.array(math_data['schoolsup'])
 schools_help=[1 if i=='yes' else 0 for i in schools_help] # binary: extra educational support
 schools_help=np.array(schools_help)
+# IMPORTANT NOTE: I could have used the np.where function, but have utilized list comprehensions instead.
+
+
 
 # setting up features variable and target values
 X_train=np.column_stack((school_name,age,address,m_ed,f_ed,travel_time,study_time,c_failures,schools_help))
