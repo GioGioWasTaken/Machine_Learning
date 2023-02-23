@@ -82,22 +82,17 @@ Y_train = (Y_train - np.mean(Y_train)) / np.std(Y_train)
 def compute_cost(x, y, theta, b):
     m = x.shape[0]
     prediction = np.dot( x, theta ) + b
-    cost = np.sum((prediction-y)**2) / (2*m)
+    cost = np.sum((prediction-y)**2)
     cost = cost / (2 * m)
     return cost
 
 # Define gradient computation function
-def compute_gradients(x, y, theta, b):
-    m, n = x.shape  # (number of examples, number of features)
-    dj_dw = np.zeros((n,))
-    dj_db = 0.
-    for i in range(m):
-        err = (np.dot( x[i], theta ) + b) - y[i]
-        for j in range(n):
-            dj_dw[j] = dj_dw[j] + err * x[i, j]
-        dj_db = dj_db + err
-    dj_dw = dj_dw / m
-    dj_db = dj_db / m
+def compute_gradients(X, y, theta, b):
+    m = len(y)
+    predictions = np.dot(X, theta) + b
+    errors = predictions - y
+    dj_dw = np.dot(X.T, errors) / m
+    dj_db = np.sum(errors) / m
     return dj_dw, dj_db
 
 # Define gradient descent function
