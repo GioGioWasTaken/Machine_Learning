@@ -128,7 +128,7 @@ print(f"Final w and b found by gradient descent:\nW: {final_w}\nB: {final_b}")
 def predict(x, w, b):
     return np.dot(x, w) + b
 # observation number to predict from the training data
-obsv=0
+obsv = 0
 
 # Make a prediction for the first training example
 prediction = predict(X_train[obsv], final_w, final_b)
@@ -152,7 +152,6 @@ ax1.set_xlabel('iteration step')   ;  ax2.set_xlabel('iteration step')
 plt.show()
 # Deduction from current results: the more features, the better this model works.
 # Perfect for practice.
-
 
 #Iteration 10000: Cost     0.21
 # Final w and b found by gradient descent:
