@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import copy, math
 # Load the data
 data = pd.read_csv('train_updated.csv')
-print(data[['Id', 'LotFrontage', 'LotArea', 'lot_depth', 'house_age', 'SalePrice']].head(5))
+print(data[['Id','lot_depth', 'house_age', 'SalePrice']].head(5))
 
 # lot depth and house age are features that did not exist before.
 # They were made using available data and feature engineering.
