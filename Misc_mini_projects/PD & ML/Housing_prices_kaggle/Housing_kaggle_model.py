@@ -73,26 +73,34 @@ GrLivArea = scaler.transform( GrLivArea )
 
 # Combine feature values into an input matrix
 X_train = np.column_stack((lot_frontage, lot_area, lot_depth, house_age,overall_quality,overall_condition,GarageArea, GarageCars, WoodDeckSF, TotRmsAbvGrd, BedroomAbvGr, GrLivArea))
-
+print(X_train.shape)
 # Standardize the output values
 Y_train = np.array(data['SalePrice'])
 Y_train = (Y_train - np.mean(Y_train)) / np.std(Y_train)
 
 
-def compute_cost(x, y, theta, b):
-    m = x.shape[0]
-    prediction = np.dot( x, theta ) + b
-    cost = np.sum((prediction-y)**2)
-    cost = cost / (2 * m)
+def compute_cost(X, y, w, b):
+    m = X.shape[0]
+    cost = 0.0
+    f_wb = np.dot(X, w) + b
+    cost =np.sum((f_wb - y) ** 2)/ (2 * m)
     return cost
 
 # Define gradient computation function
-def compute_gradients(X, y, theta, b):
-    m = len(y)
-    predictions = np.dot(X, theta) + b
-    errors = predictions - y
-    dj_dw = np.dot(X.T, errors) / m
-    dj_db = np.sum(errors) / m
+def compute_gradients(X, y, w, b):
+    m, n = X.shape  # (number of examples, number of features)
+    dj_dw = np.zeros((n,))
+    dj_db = 0.
+    err = (np.dot(X, w) + b) - y
+    dj_dw = np.dot(X.T, err) / m
+    # this is quite complicated, so let's try to understand it with this comment
+    # X was originally an array with dimensions (1460,12) 1460 observations, 12 features
+    # we now changed it to its transposition (12,1460) which is an array that has 12 observations, 1460 features
+    # this works well, because each observation of X.T, is an array of all the observation at the J position
+    # for example, the first observation of X.T would be an array of all the 1st features across all observations of X.
+    # so what we are essentially making now, is an array dj_dw that has (n,) dimensions
+    # where each item, is the dot product of the error, and all the features at the jth position.
+    dj_db = np.sum(err) /m
     return dj_dw, dj_db
 
 # Define gradient descent function
@@ -128,7 +136,7 @@ print(f"Final w and b found by gradient descent:\nW: {final_w}\nB: {final_b}")
 def predict(x, w, b):
     return np.dot(x, w) + b
 # observation number to predict from the training data
-obsv = 0
+obsv=0
 
 # Make a prediction for the first training example
 prediction = predict(X_train[obsv], final_w, final_b)
@@ -152,6 +160,7 @@ ax1.set_xlabel('iteration step')   ;  ax2.set_xlabel('iteration step')
 plt.show()
 # Deduction from current results: the more features, the better this model works.
 # Perfect for practice.
+
 
 #Iteration 10000: Cost     0.21
 # Final w and b found by gradient descent:
