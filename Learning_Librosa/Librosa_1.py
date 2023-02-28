@@ -34,7 +34,6 @@ audio_signal_2=audio_signal_2[0:4029952]
 print(len(audio_signal_1),len(audio_signal_2))
 
 # hamming distance between the audio signals
-
 hamming_dist = np.count_nonzero(audio_signal_1 != audio_signal_2)
 print(f"Hamming distance: {hamming_dist}")
 
