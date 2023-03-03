@@ -144,11 +144,10 @@ print(f"Prediction for #{obsv} training example: {prediction}\nTraining values: 
 
 def predict_all(x,y,w,b):
     all_pred=[]
-    for i in range(X_train.shape[0]):
-        all_pred.append(np.dot(x[i],w)+b)
+    all_pred.append(np.dot(x,w)+b)
     return all_pred
 all_pred=predict_all(X_train,Y_train,final_w,final_b)
-print(f"Training data: {list(Y_train)}\nPredictions: {all_pred}")
+print(f"Training data: {list(Y_train)[0:100]}\nPredictions: {all_pred[0:100]}")
 
 # plot cost versus iteration
 fig, (ax1, ax2) = plt.subplots(1, 2, constrained_layout=True, figsize=(12, 4))
@@ -158,10 +157,9 @@ ax1.set_title("Cost vs. iteration");  ax2.set_title("Cost vs. iteration (tail)")
 ax1.set_ylabel('Cost')             ;  ax2.set_ylabel('Cost')
 ax1.set_xlabel('iteration step')   ;  ax2.set_xlabel('iteration step')
 plt.show()
+# Third plot: Scatter plot of all data with final model
 # Deduction from current results: the more features, the better this model works.
 # Perfect for practice.
-
-
 #Iteration 10000: Cost     0.21
 # Final w and b found by gradient descent:
 # W: [ 1.11862456e-03  1.24833782e-01  2.69276287e-04 -2.04355404e-01
