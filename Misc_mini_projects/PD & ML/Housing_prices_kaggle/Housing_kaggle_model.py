@@ -149,6 +149,7 @@ def predict_all(x,y,w,b):
 all_pred=predict_all(X_train,Y_train,final_w,final_b)
 print(f"Training data: {list(Y_train)[0:100]}\nPredictions: {all_pred[0:100]}")
 
+
 # plot cost versus iteration
 fig, (ax1, ax2) = plt.subplots(1, 2, constrained_layout=True, figsize=(12, 4))
 ax1.plot(J_hist)
