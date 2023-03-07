@@ -57,14 +57,16 @@ def take_features(data_source):
     CabinNumber=np.array(data_source['CabinNumber'])
     # Extract side information
     Side = np.where(data_source['Cabin'].str.slice(-1) == 'P', 1, 0)
-    return cyro_sleep, age, VIP, room_service, food_court,  shopping_mall, spa, VRDeck, HomePlanet, Destination, Deck, CabinNumber, Side
+    group_size=np.array(data_source['PassengerId'].str.slice(-1))
+    is_child=np.where(data_source['Age']>=15, 1, 0)
+    return cyro_sleep, age, VIP, room_service, food_court,  shopping_mall, spa, VRDeck, HomePlanet, Destination, Deck, CabinNumber, Side, group_size, is_child
 
 
-cyro_sleep, age, VIP, room_service, food_court,  shopping_mall, spa, VRDeck, HomePlanet, Destination, Deck, CabinNumber, Side = take_features(training_data)
+cyro_sleep, age, VIP, room_service, food_court,  shopping_mall, spa, VRDeck, HomePlanet, Destination, Deck, CabinNumber, Side, group_size, is_child = take_features(training_data)
 
 
 Y_train = np.where(np.array(training_data['Transported']), 1, 0)
-X_train = np.column_stack((cyro_sleep, age, VIP, room_service, food_court,  shopping_mall, spa, VRDeck, HomePlanet, Destination, Deck, CabinNumber, Side))
+X_train = np.column_stack((cyro_sleep, age, VIP, room_service, food_court,  shopping_mall, spa, VRDeck, HomePlanet, Destination, Deck, CabinNumber, Side , group_size, is_child))
 # Define pipeline to scale data and handle missing values
 preprocessing_pipeline = Pipeline([
     ('scaler', StandardScaler()),
@@ -95,9 +97,9 @@ print(f"Hamming distance: {hamming_distance}")
 print(f"Log loss: {log_loss_train}")
 
 # Testing data, for submission:
-cyro_sleep_test, age_test, VIP_test, room_service_test, food_court_test,  shopping_mall_test, spa_test, VRDeck_test, HomePlanet_test, Destination_test, Deck_test, CabinNumber_test, Side_test=take_features(testing_data)
+cyro_sleep_test, age_test, VIP_test, room_service_test, food_court_test,  shopping_mall_test, spa_test, VRDeck_test, HomePlanet_test, Destination_test, Deck_test, CabinNumber_test, Side_test, group_size_test, is_child_test=take_features(testing_data)
 
-X_test=np.column_stack((cyro_sleep_test, age_test, VIP_test, room_service_test, food_court_test,  shopping_mall_test, spa_test, VRDeck_test, HomePlanet_test, Destination_test, Deck_test, CabinNumber_test, Side_test))
+X_test=np.column_stack((cyro_sleep_test, age_test, VIP_test, room_service_test, food_court_test,  shopping_mall_test, spa_test, VRDeck_test, HomePlanet_test, Destination_test, Deck_test, CabinNumber_test, Side_test, group_size_test, is_child_test))
 Passanger_id_test=np.array(testing_data['PassengerId'])
 X_test_preprocessed = preprocessing_pipeline.transform(X_test)
 # making a prediction for the testing data:
