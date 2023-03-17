@@ -2,7 +2,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
 import tensorflow as tf
-from sklearn.metrics import hamming_loss
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 from sklearn.impute import SimpleImputer
@@ -31,12 +30,10 @@ def take_features(data_source):
     is_europe = HomePlanet == 'Europa'
     is_earth = HomePlanet == 'Earth'
     is_mars = HomePlanet == 'Mars'
-    is_blank = HomePlanet == ''
     # Define the conditions for Destination
     is_trappist = Destination == 'TRAPPIST-1e'
     is_cancri = Destination == '55 Cancri e'
     is_PS0 = Destination == 'PSO J318.5-22'
-    is_blank2 = Destination == ''
     # Use nested np.where statements to apply the conditions
     HomePlanet = np.where(is_europe, 1, np.where(is_earth, 2, np.where(is_mars, 3, 0)))
     Destination = np.where(is_trappist, 1, np.where(is_cancri, 2, np.where(is_PS0, 3, 0)))
@@ -82,6 +79,7 @@ Y_train = tf.convert_to_tensor(Y_train, dtype=tf.float32)
 
 
 model=tf.keras.models.Sequential([
+    tf.keras.layers.Dense( 80, activation="relu" ),
     tf.keras.layers.Dense( 40, activation="relu" ),
     tf.keras.layers.Dense( 20, activation="relu" ),
     tf.keras.layers.Dense( 10, activation="relu" ),
@@ -89,17 +87,24 @@ model=tf.keras.models.Sequential([
     tf.keras.layers.Dense( 1, activation="sigmoid" )
 ])
 model.compile(loss=tf.keras.losses.binary_crossentropy,optimizer=tf.keras.optimizers.Adam(0.01))
-model.fit(X_train,Y_train,epochs=200)
+
+history = model.fit(X_train,Y_train,epochs=200)
+
 predictions=model.predict(X_train)
-predictions = np.array(predictions).flatten() # a necessary step so np.where works.
+predictions = np.array(predictions).flatten()
 predictions=np.where(predictions>=0.5, 1 , 0)
-print(list(predictions))
-# compute the hamming loss print it
+
 hamming_distance = tf.math.reduce_mean(tf.cast(tf.math.not_equal(Y_train, predictions), dtype=tf.float32))
 print(f"Hamming distance: {hamming_distance}")
 print(f"Predictions:{predictions.tolist()}\nTrueValues:{list(Y_train_numpy)}")
 
-# Testing data, for submission:
+# plot the loss over epochs
+plt.plot(history.history['loss'])
+plt.title('Model Loss')
+plt.xlabel('Epoch')
+plt.ylabel('Loss')
+plt.show()
+
 cyro_sleep_test, age_test, VIP_test, room_service_test, food_court_test,  shopping_mall_test, spa_test, VRDeck_test, HomePlanet_test, Destination_test, Deck_test, CabinNumber_test, Side_test, group_size_test, is_child_test=take_features(testing_data)
 
 X_test=np.column_stack((cyro_sleep_test, age_test, VIP_test, room_service_test, food_court_test,  shopping_mall_test, spa_test, VRDeck_test, HomePlanet_test, Destination_test, Deck_test, CabinNumber_test, Side_test, group_size_test, is_child_test))
@@ -108,8 +113,10 @@ X_test = preprocessing_pipeline.transform(X_test)
 X_test = tf.convert_to_tensor(X_test, dtype=tf.float32)
 
 test_predictions=model.predict(X_test)
+print(test_predictions)
 test_predictions = np.array(test_predictions).flatten()
+print(test_predictions)
 test_predictions = np.where(test_predictions>=0.5, True, False)
 
-submission = pd.DataFrame({'PassengerId': Passanger_id_test, 'Transported': np.ravel(test_predictions)})
+submission = pd.DataFrame({'PassengerId': Passanger_id_test, 'Transported': test_predictions})
 submission.to_csv('Spaceship_Titanic_submissions_NeuralNetworks.csv', index=False)
