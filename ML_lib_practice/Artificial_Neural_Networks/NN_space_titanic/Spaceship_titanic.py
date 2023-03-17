@@ -1,12 +1,11 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
+import tensorflow as tf
+from sklearn.metrics import hamming_loss
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 from sklearn.impute import SimpleImputer
-from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import hamming_loss
-from sklearn.metrics import log_loss
 
 
 # Load data
@@ -66,44 +65,51 @@ cyro_sleep, age, VIP, room_service, food_court,  shopping_mall, spa, VRDeck, Hom
 
 Y_train = np.where(np.array(training_data['Transported']), 1, 0)
 X_train = np.column_stack((cyro_sleep, age, VIP, room_service, food_court,  shopping_mall, spa, VRDeck, HomePlanet, Destination, Deck, CabinNumber, Side , group_size, is_child))
-# Define pipeline to scale data and handle missing values
+
 preprocessing_pipeline = Pipeline([
     ('scaler', StandardScaler()),
     ('imputer', SimpleImputer(strategy='median'))
 ])
 
 # Fit pipeline on training data and transform X_train
-X_train_preprocessed = preprocessing_pipeline.fit_transform(X_train)
+X_train = preprocessing_pipeline.fit_transform(X_train)
 
-# Define logistic regression model and fit on preprocessed data
-model = LogisticRegression(max_iter=100)
-model.fit(X_train_preprocessed, Y_train)
+#Save the ndarray as a different variable
+Y_train_numpy=Y_train
+# convert the arrays to tensorflow objects
+X_train = tf.convert_to_tensor(X_train, dtype=tf.float32)
+Y_train = tf.convert_to_tensor(Y_train, dtype=tf.float32)
 
-# Print model coefficients and intercept
-print(f"Model weights: {model.coef_}")
-print(f"Model bias: {model.intercept_}")
 
-predictions=model.predict(X_train_preprocessed)
-print(f"Predictions:{list(predictions)}\nTrueValues:{list(Y_train)}")
-
-# compute the hamming loss and the log loss
-hamming_distance = hamming_loss(Y_train, predictions)
-
-Y_train_proba = model.predict_proba(X_train_preprocessed)
-log_loss_train = log_loss(Y_train, Y_train_proba)
-
+model=tf.keras.models.Sequential([
+    tf.keras.layers.Dense( 40, activation="relu" ),
+    tf.keras.layers.Dense( 20, activation="relu" ),
+    tf.keras.layers.Dense( 10, activation="relu" ),
+    tf.keras.layers.Dense( 5, activation="relu" ),
+    tf.keras.layers.Dense( 1, activation="sigmoid" )
+])
+model.compile(loss=tf.keras.losses.binary_crossentropy,optimizer=tf.keras.optimizers.Adam(0.01))
+model.fit(X_train,Y_train,epochs=200)
+predictions=model.predict(X_train)
+predictions = np.array(predictions).flatten() # a necessary step so np.where works.
+predictions=np.where(predictions>=0.5, 1 , 0)
+print(list(predictions))
+# compute the hamming loss print it
+hamming_distance = tf.math.reduce_mean(tf.cast(tf.math.not_equal(Y_train, predictions), dtype=tf.float32))
 print(f"Hamming distance: {hamming_distance}")
-print(f"Log loss: {log_loss_train}")
+print(f"Predictions:{predictions.tolist()}\nTrueValues:{list(Y_train_numpy)}")
 
 # Testing data, for submission:
 cyro_sleep_test, age_test, VIP_test, room_service_test, food_court_test,  shopping_mall_test, spa_test, VRDeck_test, HomePlanet_test, Destination_test, Deck_test, CabinNumber_test, Side_test, group_size_test, is_child_test=take_features(testing_data)
 
 X_test=np.column_stack((cyro_sleep_test, age_test, VIP_test, room_service_test, food_court_test,  shopping_mall_test, spa_test, VRDeck_test, HomePlanet_test, Destination_test, Deck_test, CabinNumber_test, Side_test, group_size_test, is_child_test))
 Passanger_id_test=np.array(testing_data['PassengerId'])
-X_test_preprocessed = preprocessing_pipeline.transform(X_test)
-# making a prediction for the testing data:
-test_predictions = model.predict(X_test_preprocessed)
-test_predictions = np.where(test_predictions == 1, True, False)
-print(f"Test Predictions: {list(test_predictions)}")
-submission = pd.DataFrame({'PassengerId': Passanger_id_test, 'Transported': test_predictions})
-submission.to_csv('Spaceship_Titanic_submissions.csv', index=False)
+X_test = preprocessing_pipeline.transform(X_test)
+X_test = tf.convert_to_tensor(X_test, dtype=tf.float32)
+
+test_predictions=model.predict(X_test)
+test_predictions = np.array(test_predictions).flatten()
+test_predictions = np.where(test_predictions>=0.5, True, False)
+
+submission = pd.DataFrame({'PassengerId': Passanger_id_test, 'Transported': np.ravel(test_predictions)})
+submission.to_csv('Spaceship_Titanic_submissions_NeuralNetworks.csv', index=False)

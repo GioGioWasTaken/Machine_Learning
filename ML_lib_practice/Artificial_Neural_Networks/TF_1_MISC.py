@@ -5,7 +5,7 @@ import pandas as pd
 # a model using tensorflow
 model = tf.keras.models.Sequential( [
     tf.keras.layers.Dense( 25, activation="sigmoid" ),
-    tf.keras.layers.Dense( 15, activation="sigmoid" ),
+    tf.keras.layers.Dense( 15, activation="sigmoid" ), # this was coded before I learned about ReLU
     tf.keras.layers.Dense( 1, activation="sigmoid" )
 ], name="my_model" )
 
