@@ -2,9 +2,13 @@ import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
 import tensorflow as tf
+#from tf.keras.models import Sequential
+#from tf.keras.layers import Dense
+#from tf.keras.regularizers import L1
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 from sklearn.impute import SimpleImputer
+from sklearn.model_selection import train_test_split
 
 
 # Load data
@@ -73,22 +77,35 @@ X_train = preprocessing_pipeline.fit_transform(X_train)
 
 #Save the ndarray as a different variable
 Y_train_numpy=Y_train
+
+# make some custom testing data, unrelated to the one provided by the kaggle competition, for testing purposes.
+
+X_train, my_X_test, Y_train, my_Y_test = train_test_split(X_train, Y_train, test_size=0.3, random_state=42)
+
+
 # convert the arrays to tensorflow objects
 X_train = tf.convert_to_tensor(X_train, dtype=tf.float32)
 Y_train = tf.convert_to_tensor(Y_train, dtype=tf.float32)
 
 
-model=tf.keras.models.Sequential([
-    tf.keras.layers.Dense( 80, activation="relu" ),
-    tf.keras.layers.Dense( 40, activation="relu" ),
-    tf.keras.layers.Dense( 20, activation="relu" ),
-    tf.keras.layers.Dense( 10, activation="relu" ),
-    tf.keras.layers.Dense( 5, activation="relu" ),
-    tf.keras.layers.Dense( 1, activation="sigmoid" )
-])
-model.compile(loss=tf.keras.losses.binary_crossentropy,optimizer=tf.keras.optimizers.Adam(0.01))
+my_X_test = tf.convert_to_tensor(my_X_test, dtype=tf.float32)
+my_Y_test = tf.convert_to_tensor(my_Y_test, dtype=tf.float32)
 
-history = model.fit(X_train,Y_train,epochs=200)
+
+L2=tf.keras.regularizers.L2
+Dense=tf.keras.layers.Dense
+Sequential=tf.keras.models.Sequential
+Dropout=tf.keras.layers.Dropout
+model = Sequential()
+model.add(Dense(85, activation="relu"))
+model.add(Dropout(0.3))
+model.add(Dense(50, activation="relu"))
+model.add(Dropout(0.1))
+model.add(Dense(25, activation="relu"))
+model.add(Dense(1, activation="sigmoid"))
+
+model.compile(loss=tf.keras.losses.binary_crossentropy,optimizer=tf.keras.optimizers.Adam(0.01))
+history = model.fit(X_train,Y_train,epochs=150)
 
 predictions=model.predict(X_train)
 predictions = np.array(predictions).flatten()
@@ -98,13 +115,18 @@ hamming_distance = tf.math.reduce_mean(tf.cast(tf.math.not_equal(Y_train, predic
 print(f"Hamming distance: {hamming_distance}")
 print(f"Predictions:{predictions.tolist()}\nTrueValues:{list(Y_train_numpy)}")
 
-# plot the loss over epochs
-plt.plot(history.history['loss'])
-plt.title('Model Loss')
-plt.xlabel('Epoch')
-plt.ylabel('Loss')
-plt.show()
 
+# using my custom testing data
+my_test_pred=model.predict(my_X_test)
+my_test_pred=np.array(my_test_pred).flatten()
+my_test_pred=np.where(my_test_pred>=0.5,1,0)
+my_test_hamming_distance = tf.math.reduce_mean(tf.cast(tf.math.not_equal(my_Y_test, my_test_pred), dtype=tf.float32))
+print(f"Test Hamming distance: {my_test_hamming_distance}")
+
+
+
+
+# kaggle provided testing data for submission
 cyro_sleep_test, age_test, VIP_test, room_service_test, food_court_test,  shopping_mall_test, spa_test, VRDeck_test, HomePlanet_test, Destination_test, Deck_test, CabinNumber_test, Side_test, group_size_test, is_child_test=take_features(testing_data)
 
 X_test=np.column_stack((cyro_sleep_test, age_test, VIP_test, room_service_test, food_court_test,  shopping_mall_test, spa_test, VRDeck_test, HomePlanet_test, Destination_test, Deck_test, CabinNumber_test, Side_test, group_size_test, is_child_test))
@@ -120,3 +142,10 @@ test_predictions = np.where(test_predictions>=0.5, True, False)
 
 submission = pd.DataFrame({'PassengerId': Passanger_id_test, 'Transported': test_predictions})
 submission.to_csv('Spaceship_Titanic_submissions_NeuralNetworks.csv', index=False)
+
+# plot the loss over epochs
+plt.plot(history.history['loss'])
+plt.title('Model Loss')
+plt.xlabel('Epoch')
+plt.ylabel('Loss')
+plt.show()
